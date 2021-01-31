@@ -27,33 +27,33 @@ main = do
     else if elem "-o" args && getParamAfterFlag "-o" args == Nothing
     then putStr $ makeError toStdOut "No output file specified."
     else do
-    let inputFileName = head params
+        let inputFileName = head params
 
-    parsedFile <- parseDefinitions (not toStdOut) >>= parseFileWithDefinitions inputFileName
-    
-    if elem "-o" args
-    then case getParamAfterFlag "-o" args of 
-        Just name -> case parsedFile of
-            Left result -> writeFile name result
-            Right (lineNum, err) -> return()
-        Nothing -> return ()
-    else return ()
-    
-    if toStdOut
-    then case parsedFile of
-        Left result -> hPut stdout result
-        Right err -> putStr $ makeError toStdOut ("Error parsing file " ++ inputFileName ++ ", line " ++ show (fst err) ++ ": " ++ (snd err))
-    else do 
-        if not (elem "-o" args) 
-        then case parsedFile of
-            Left result -> writeFile (stripExtension inputFileName ++ ".dmp") result
-            Right (lineNum, err) ->
-                putStrLn ("Error on line " ++ show lineNum ++ ": " ++ err)
+        parsedFile <- parseDefinitions (not toStdOut) >>= parseFileWithDefinitions inputFileName
+        
+        if elem "-o" args
+        then case getParamAfterFlag "-o" args of 
+            Just name -> case parsedFile of
+                Left result -> writeFile name result
+                Right (lineNum, err) -> return()
+            Nothing -> return ()
         else return ()
-        putStrLn ("Finished parsing " ++ inputFileName ++ ".")
-    
-    -- putStr "Complete. Press enter to continue."
-    -- hFlush stdout
-    -- getLine
-    
-    return ()
+        
+        if toStdOut
+        then case parsedFile of
+            Left result -> hPut stdout result
+            Right err -> putStr $ makeError toStdOut ("Error parsing file " ++ inputFileName ++ ", line " ++ show (fst err) ++ ": " ++ (snd err))
+        else do 
+            if not (elem "-o" args) 
+            then case parsedFile of
+                Left result -> writeFile (stripExtension inputFileName ++ ".dmp") result
+                Right (lineNum, err) ->
+                    putStrLn ("Error on line " ++ show lineNum ++ ": " ++ err)
+            else return ()
+            putStrLn ("Finished parsing " ++ inputFileName ++ ".")
+        
+        -- putStr "Complete. Press enter to continue."
+        -- hFlush stdout
+        -- getLine
+        
+        return ()

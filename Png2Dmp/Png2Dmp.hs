@@ -31,26 +31,26 @@ main = do
     else if elem "-o" argv && getParamAfterFlag "-o" argv == Nothing
     then Prelude.putStr $ makeError toStdOut "No output file specified."
     else do
-    let inputFileName = head params
-    let paletteOnly = elem "--palette-only" options
-    result <- (try (readFile inputFileName)::IO (Either IOException ByteString))
-    case result of
-        Left exception -> putStr $ makeError toStdOut ("Could not find or read file " ++ inputFileName ++ ".")
-        Right inputData -> case pngToGba inputData of
-            Left err -> putStr $ makeError toStdOut err
-            Right (plt, img) -> do
-                let finalData = compression img
-                if not paletteOnly
-                then if toStdOut
-                    then hPut stdout finalData >> case getParamAfterFlag "-o" argv of
-                        Just name -> writeFile name finalData
-                        Nothing -> return ()
-                    else case getParamAfterFlag "-o" argv of
-                        Just name -> writeFile name finalData
-                        Nothing -> writeFile (stripExtension inputFileName ++ ".dmp") finalData
-                else return ()
-                if elem "-po" argv
-                    then case (getParamAfterFlag "-po" argv) of
-                        Nothing -> putStr $ makeError toStdOut "No output for the palette specified!"
-                        Just outputPaletteName -> writeFile outputPaletteName plt
-                    else if paletteOnly then hPut stdout (compression plt) else return ()
+        let inputFileName = head params
+        let paletteOnly = elem "--palette-only" options
+        result <- (try (readFile inputFileName)::IO (Either IOException ByteString))
+        case result of
+            Left exception -> putStr $ makeError toStdOut ("Could not find or read file " ++ inputFileName ++ ".")
+            Right inputData -> case pngToGba inputData of
+                Left err -> putStr $ makeError toStdOut err
+                Right (plt, img) -> do
+                    let finalData = compression img
+                    if not paletteOnly
+                    then if toStdOut
+                        then hPut stdout finalData >> case getParamAfterFlag "-o" argv of
+                            Just name -> writeFile name finalData
+                            Nothing -> return ()
+                        else case getParamAfterFlag "-o" argv of
+                            Just name -> writeFile name finalData
+                            Nothing -> writeFile (stripExtension inputFileName ++ ".dmp") finalData
+                    else return ()
+                    if elem "-po" argv
+                        then case (getParamAfterFlag "-po" argv) of
+                            Nothing -> putStr $ makeError toStdOut "No output for the palette specified!"
+                            Just outputPaletteName -> writeFile outputPaletteName plt
+                        else if paletteOnly then hPut stdout (compression plt) else return ()
